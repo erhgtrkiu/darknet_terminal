@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DarkNet Terminal v3.14</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background-color: #0a0a0a;
+            color: #00ff00;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background-color: #001100;
+            padding: 10px;
+            border-bottom: 1px solid #003300;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.2em;
+            font-weight: bold;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        
+        .status {
+            font-size: 0.9em;
+            color: #00aa00;
+        }
+        
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 200px;
+            background-color: #001a00;
+            border-right: 1px solid #003300;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        
+        .menu-item {
+            padding: 8px 5px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            border-left: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .menu-item:hover, .menu-item.active {
+            background-color: #002200;
+            border-left: 2px solid #00ff00;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .terminal {
+            background-color: #000000;
+            border: 1px solid #003300;
+            border-radius: 5px;
+            padding: 15px;
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+        }
+        
+        .terminal-line {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+        
+        .prompt {
+            color: #00ff00;
+        }
+        
+        .command {
+            color: #ffffff;
+        }
+        
+        .output {
+            color: #00aa00;
+        }
+        
+        .error {
+            color: #ff0000;
+        }
+        
+        .input-area {
+            display: flex;
+            align-items: center;
+        }
+        
+        .input-prompt {
+            margin-right: 10px;
+        }
+        
+        .command-input {
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            outline: none;
+            flex: 1;
+            font-size: 1em;
+        }
+        
+        .tools {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .tool-btn {
+            background-color: #002200;
+            border: 1px solid #003300;
+            color: #00ff00;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tool-btn:hover {
+            background-color: #003300;
+            box-shadow: 0 0 5px #00ff00;
+        }
+        
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .login-form {
+            background-color: #001100;
+            border: 1px solid #003300;
+            padding: 30px;
+            border-radius: 5px;
+            width: 300px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        
+        .login-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        
+        .login-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #000000;
+            border: 1px solid #003300;
+            color: #00ff00;
+            outline: none;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #002200;
+            border: 1px solid #003300;
+            color: #00ff00;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .login-btn:hover {
+            background-color: #003300;
+            box-shadow: 0 0 5px #00ff00;
+        }
+        
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to bottom, transparent, #00ff00, transparent);
+            opacity: 0.1;
+            animation: scan 5s linear infinite;
+        }
+        
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+        
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .glitch {
+            position: relative;
+        }
+        
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .glitch::before {
+            left: 2px;
+            text-shadow: -1px 0 #ff00ff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        
+        .glitch::after {
+            left: -2px;
+            text-shadow: -1px 0 #00ffff;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+        
+        @keyframes glitch-anim {
+            0% { clip: rect(42px, 9999px, 44px, 0); }
+            5% { clip: rect(12px, 9999px, 59px, 0); }
+            10% { clip: rect(48px, 9999px, 29px, 0); }
+            15% { clip: rect(42px, 9999px, 73px, 0); }
+            20% { clip: rect(63px, 9999px, 27px, 0); }
+            25% { clip: rect(34px, 9999px, 55px, 0); }
+            30% { clip: rect(86px, 9999px, 73px, 0); }
+            35% { clip: rect(20px, 9999px, 20px, 0); }
+            40% { clip: rect(26px, 9999px, 60px, 0); }
+            45% { clip: rect(25px, 9999px, 66px, 0); }
+            50% { clip: rect(57px, 9999px, 98px, 0); }
+            55% { clip: rect(5px, 9999px, 46px, 0); }
+            60% { clip: rect(82px, 9999px, 31px, 0); }
+            65% { clip: rect(54px, 9999px, 27px, 0); }
+            70% { clip: rect(28px, 9999px, 99px, 0); }
+            75% { clip: rect(45px, 9999px, 69px, 0); }
+            80% { clip: rect(23px, 9999px, 85px, 0); }
+            85% { clip: rect(54px, 9999px, 84px, 0); }
+            90% { clip: rect(45px, 9999px, 47px, 0); }
+            95% { clip: rect(37px, 9999px, 20px, 0); }
+            100% { clip: rect(4px, 9999px, 91px, 0); }
+        }
+        
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); }
+            5% { clip: rect(52px, 9999px, 74px, 0); }
+            10% { clip: rect(79px, 9999px, 85px, 0); }
+            15% { clip: rect(75px, 9999px, 5px, 0); }
+            20% { clip: rect(67px, 9999px, 61px, 0); }
+            25% { clip: rect(14px, 9999px, 79px, 0); }
+            30% { clip: rect(1px, 9999px, 66px, 0); }
+            35% { clip: rect(86px, 9999px, 30px, 0); }
+            40% { clip: rect(23px, 9999px, 98px, 0); }
+            45% { clip: rect(85px, 9999px, 72px, 0); }
+            50% { clip: rect(71px, 9999px, 75px, 0); }
+            55% { clip: rect(2px, 9999px, 48px, 0); }
+            60% { clip: rect(30px, 9999px, 16px, 0); }
+            65% { clip: rect(59px, 9999px, 50px, 0); }
+            70% { clip: rect(41px, 9999px, 62px, 0); }
+            75% { clip: rect(2px, 9999px, 82px, 0); }
+            80% { clip: rect(47px, 9999px, 73px, 0); }
+            85% { clip: rect(3px, 9999px, 27px, 0); }
+            90% { clip: rect(26px, 9999px, 55px, 0); }
+            95% { clip: rect(42px, 9999px, 97px, 0); }
+            100% { clip: rect(38px, 9999px, 49px, 0); }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #001100;
+            border: 1px solid #003300;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #00ff00;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="scan-line"></div>
+    
+    <div id="loginScreen" class="login-screen">
+        <div class="login-form">
+            <div class="login-title glitch" data-text="DARKNET ACCESS">DARKNET ACCESS</div>
+            <input type="text" id="username" class="login-input" placeholder="USERNAME">
+            <input type="password" id="password" class="login-input" placeholder="PASSWORD">
+            <button id="loginBtn" class="login-btn">AUTHENTICATE</button>
+            <div id="loginStatus" class="terminal-line output" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+    
+    <div id="mainInterface" class="hidden">
+        <div class="header">
+            <div class="logo">DARKNET TERMINAL v3.14</div>
+            <div class="status">CONNECTION: <span class="blink">ENCRYPTED</span> | ANONYMITY: <span id="anonymityLevel">HIGH</span></div>
+        </div>
+        
+        <div class="container">
+            <div class="sidebar">
+                <div class="menu-item active" data-tab="main">MAIN TERMINAL</div>
+                <div class="menu-item" data-tab="network">NETWORK SCAN</div>
+                <div class="menu-item" data-tab="exploits">EXPLOITS</div>
+                <div class="menu-item" data-tab="crypto">CRYPTO TOOLS</div>
+                <div class="menu-item" data-tab="stealth">STEALTH MODE</div>
+                <div class="menu-item" data-tab="logs">SYSTEM LOGS</div>
+            </div>
+            
+            <div class="main-content">
+                <div class="terminal" id="terminal">
+                    <div class="terminal-line prompt">user@darknet:~$ <span class="command">welcome</span></div>
+                    <div class="terminal-line output">Initializing DarkNet Terminal v3.14...</div>
+                    <div class="terminal-line output">Establishing encrypted connection...</div>
+                    <div class="terminal-line output">Connection secured. Welcome, USER.</div>
+                    <div class="terminal-line output">Type 'help' for available commands.</div>
+                    <div class="terminal-line prompt">user@darknet:~$ <span class="command" id="currentCommand"></span></div>
+                </div>
+                
+                <div class="input-area">
+                    <div class="input-prompt">user@darknet:~$</div>
+                    <input type="text" id="commandInput" class="command-input" autocomplete="off">
+                </div>
+                
+                <div class="tools">
+                    <button class="tool-btn" id="clearBtn">CLEAR TERMINAL</button>
+                    <button class="tool-btn" id="encryptBtn">ENCRYPT CONNECTION</button>
+                    <button class="tool-btn" id="scanBtn">NETWORK SCAN</button>
+                    <button class="tool-btn" id="logoutBtn">LOGOUT</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Элементы интерфейса
+        const loginScreen = document.getElementById('loginScreen');
+        const mainInterface = document.getElementById('mainInterface');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginStatus = document.getElementById('loginStatus');
+        const terminal = document.getElementById('terminal');
+        const commandInput = document.getElementById('commandInput');
+        const currentCommand = document.getElementById('currentCommand');
+        const clearBtn = document.getElementById('clearBtn');
+        const encryptBtn = document.getElementById('encryptBtn');
+        const scanBtn = document.getElementById('scanBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const anonymityLevel = document.getElementById('anonymityLevel');
+        
+        // Переменные состояния
+        let isLoggedIn = false;
+        let connectionEncrypted = true;
+        let currentTab = 'main';
+        
+        // Команды терминала
+        const commands = {
+            help: {
+                description: "Показать список доступных команд",
+                execute: () => {
+                    addOutput("Доступные команды:");
+                    addOutput("help - Показать этот список");
+                    addOutput("clear - Очистить терминал");
+                    addOutput("scan - Сканировать сеть");
+                    addOutput("encrypt - Зашифровать соединение");
+                    addOutput("decrypt - Расшифровать соединение");
+                    addOutput("status - Показать статус системы");
+                    addOutput("exploit [target] - Запустить эксплойт");
+                    addOutput("bruteforce [target] - Атака перебором");
+                    addOutput("stealth - Включить режим невидимости");
+                    addOutput("logout - Выйти из системы");
+                }
+            },
+            clear: {
+                description: "Очистить терминал",
+                execute: () => {
+                    clearTerminal();
+                }
+            },
+            scan: {
+                description: "Сканировать сеть",
+                execute: () => {
+                    addOutput("Запуск сетевого сканирования...");
+                    simulateProgress(() => {
+                        addOutput("Найдено 5 активных узлов:");
+                        addOutput("192.168.1.1 - РОУТЕР");
+                        addOutput("192.168.1.15 - ПК (Windows 10)");
+                        addOutput("192.168.1.23 - СЕРВЕР (Linux)");
+                        addOutput("192.168.1.42 - УСТРОЙСТВО IoT");
+                        addOutput("192.168.1.99 - НЕИЗВЕСТНОЕ УСТРОЙСТВО");
+                    });
+                }
+            },
+            encrypt: {
+                description: "Зашифровать соединение",
+                execute: () => {
+                    if (connectionEncrypted) {
+                        addOutput("Соединение уже зашифровано.");
+                    } else {
+                        addOutput("Шифрование соединения...");
+                        simulateProgress(() => {
+                            connectionEncrypted = true;
+                            anonymityLevel.textContent = "HIGH";
+                            addOutput("Соединение зашифровано. Анонимность: ВЫСОКАЯ");
+                        });
+                    }
+                }
+            },
+            decrypt: {
+                description: "Расшифровать соединение",
+                execute: () => {
+                    if (!connectionEncrypted) {
+                        addOutput("Соединение уже расшифровано.");
+                    } else {
+                        addOutput("Расшифровка соединения...");
+                        simulateProgress(() => {
+                            connectionEncrypted = false;
+                            anonymityLevel.textContent = "LOW";
+                            addOutput("Соединение расшифровано. Анонимность: НИЗКАЯ");
+                        });
+                    }
+                }
+            },
+            status: {
+                description: "Показать статус системы",
+                execute: () => {
+                    addOutput("=== СТАТУС СИСТЕМЫ ===");
+                    addOutput(`Пользователь: ${usernameInput.value || 'USER'}`);
+                    addOutput(`Шифрование: ${connectionEncrypted ? 'ВКЛ' : 'ВЫКЛ'}`);
+                    addOutput(`Анонимность: ${anonymityLevel.textContent}`);
+                    addOutput(`Время работы: ${Math.floor(Math.random() * 24)}:${Math.floor(Math.random() * 60)}`);
+                    addOutput(`Активные соединения: ${Math.floor(Math.random() * 10)}`);
+                }
+            },
+            exploit: {
+                description: "Запустить эксплойт",
+                execute: (target) => {
+                    if (!target) {
+                        addOutput("Ошибка: укажите цель. Пример: exploit 192.168.1.15");
+                        return;
+                    }
+                    
+                    addOutput(`Запуск эксплойта для цели: ${target}`);
+                    simulateProgress(() => {
+                        if (Math.random() > 0.3) {
+                            addOutput("Эксплойт успешен! Уязвимость CVE-2021-34527 обнаружена.");
+                            addOutput("Установка бэкдора...");
+                            setTimeout(() => {
+                                addOutput("Бэкдор успешно установлен.");
+                                addOutput(`Доступ к ${target} получен.`);
+                            }, 1500);
+                        } else {
+                            addOutput("Эксплойт не удался. Система защищена.");
+                        }
+                    });
+                }
+            },
+            bruteforce: {
+                description: "Атака перебором",
+                execute: (target) => {
+                    if (!target) {
+                        addOutput("Ошибка: укажите цель. Пример: bruteforce 192.168.1.23");
+                        return;
+                    }
+                    
+                    addOutput(`Запуск атаки перебором на: ${target}`);
+                    addOutput("Перебор паролей...");
+                    
+                    const passwords = ["admin", "password", "123456", "qwerty", "letmein", "admin123"];
+                    let attempts = 0;
+                    
+                    const bruteInterval = setInterval(() => {
+                        attempts++;
+                        const password = passwords[Math.floor(Math.random() * passwords.length)];
+                        addOutput(`Попытка ${attempts}: ${password}... НЕВЕРНО`);
+                        
+                        if (attempts >= 10) {
+                            clearInterval(bruteInterval);
+                            if (Math.random() > 0.7) {
+                                addOutput("Пароль найден: P@ssw0rd!");
+                                addOutput("Доступ получен.");
+                            } else {
+                                addOutput("Атака не удалась. Слишком много попыток.");
+                            }
+                        }
+                    }, 500);
+                }
+            },
+            stealth: {
+                description: "Включить режим невидимости",
+                execute: () => {
+                    addOutput("Активация режима невидимости...");
+                    simulateProgress(() => {
+                        addOutput("Режим невидимости активирован.");
+                        addOutput("Все следы удалены. Отслеживание невозможно.");
+                        anonymityLevel.textContent = "MAXIMUM";
+                    });
+                }
+            },
+            logout: {
+                description: "Выйти из системы",
+                execute: () => {
+                    logout();
+                }
+            }
+        };
+        
+        // Функции
+        
+        function login() {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            
+            if (!username || !password) {
+                loginStatus.textContent = "ОШИБКА: Введите имя пользователя и пароль";
+                return;
+            }
+            
+            // Симуляция проверки учетных данных
+            loginStatus.textContent = "Проверка учетных данных...";
+            
+            setTimeout(() => {
+                if (username === "admin" && password === "password") {
+                    loginStatus.textContent = "Доступ разрешен. Вход в систему...";
+                    
+                    setTimeout(() => {
+                        loginScreen.classList.add('hidden');
+                        mainInterface.classList.remove('hidden');
+                        isLoggedIn = true;
+                        addOutput(`Добро пожаловать, ${username}.`);
+                    }, 1500);
+                } else {
+                    loginStatus.textContent = "ОШИБКА: Неверные учетные данные";
+                    usernameInput.value = "";
+                    passwordInput.value = "";
+                }
+            }, 2000);
+        }
+        
+        function logout() {
+            isLoggedIn = false;
+            mainInterface.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+            loginStatus.textContent = "";
+            usernameInput.value = "";
+            passwordInput.value = "";
+            clearTerminal();
+            addInitialTerminalLines();
+        }
+        
+        function addOutput(text, className = "output") {
+            const line = document.createElement('div');
+            line.className = `terminal-line ${className}`;
+            line.textContent = text;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        function addInitialTerminalLines() {
+            terminal.innerHTML = `
+                <div class="terminal-line prompt">user@darknet:~$ <span class="command">welcome</span></div>
+                <div class="terminal-line output">Initializing DarkNet Terminal v3.14...</div>
+                <div class="terminal-line output">Establishing encrypted connection...</div>
+                <div class="terminal-line output">Connection secured. Welcome, USER.</div>
+                <div class="terminal-line output">Type 'help' for available commands.</div>
+                <div class="terminal-line prompt">user@darknet:~$ <span class="command" id="currentCommand"></span></div>
+            `;
+            currentCommand = document.getElementById('currentCommand');
+        }
+        
+        function clearTerminal() {
+            terminal.innerHTML = '<div class="terminal-line prompt">user@darknet:~$ <span class="command" id="currentCommand"></span></div>';
+            currentCommand = document.getElementById('currentCommand');
+        }
+        
+        function simulateProgress(callback, duration = 2000) {
+            const progressBar = document.createElement('div');
+            progressBar.className = 'progress-bar';
+            
+            const progress = document.createElement('div');
+            progress.className = 'progress';
+            progressBar.appendChild(progress);
+            
+            terminal.appendChild(progressBar);
+            terminal.scrollTop = terminal.scrollHeight;
+            
+            let width = 0;
+            const interval = setInterval(() => {
+                width += 2;
+                progress.style.width = width + '%';
+                
+                if (width >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        progressBar.remove();
+                        callback();
+                    }, 500);
+                }
+            }, duration / 50);
+        }
+        
+        function executeCommand(input) {
+            const parts = input.trim().split(' ');
+            const commandName = parts[0].toLowerCase();
+            const args = parts.slice(1);
+            
+            currentCommand.textContent = input;
+            
+            if (commands[commandName]) {
+                commands[commandName].execute(...args);
+            } else {
+                addOutput(`Команда не найдена: ${commandName}`, "error");
+                addOutput("Введите 'help' для списка доступных команд.");
+            }
+            
+            // Добавляем новую строку с приглашением
+            const newPrompt = document.createElement('div');
+            newPrompt.className = 'terminal-line prompt';
+            newPrompt.innerHTML = 'user@darknet:~$ <span class="command" id="currentCommand"></span>';
+            terminal.appendChild(newPrompt);
+            currentCommand = document.getElementById('currentCommand');
+            
+            // Очищаем поле ввода
+            commandInput.value = '';
+            
+            // Прокручиваем терминал вниз
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        // Обработчики событий
+        
+        loginBtn.addEventListener('click', login);
+        
+        usernameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
+        
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
+        
+        commandInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const command = commandInput.value.trim();
+                if (command) {
+                    executeCommand(command);
+                }
+            }
+        });
+        
+        clearBtn.addEventListener('click', () => {
+            commands.clear.execute();
+        });
+        
+        encryptBtn.addEventListener('click', () => {
+            commands.encrypt.execute();
+        });
+        
+        scanBtn.addEventListener('click', () => {
+            commands.scan.execute();
+        });
+        
+        logoutBtn.addEventListener('click', () => {
+            commands.logout.execute();
+        });
+        
+        // Инициализация
+        addInitialTerminalLines();
+    </script>
+</body>
+</html>
