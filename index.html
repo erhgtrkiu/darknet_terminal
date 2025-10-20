@@ -108,6 +108,10 @@
             color: #ff0000;
         }
         
+        .warning {
+            color: #ffff00;
+        }
+        
         .input-area {
             display: flex;
             align-items: center;
@@ -318,6 +322,38 @@
         .hidden {
             display: none;
         }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .system-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .info-box {
+            background-color: #001100;
+            border: 1px solid #003300;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        
+        .info-title {
+            font-size: 0.9em;
+            color: #00aa00;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
@@ -350,18 +386,108 @@
             </div>
             
             <div class="main-content">
-                <div class="terminal" id="terminal">
-                    <div class="terminal-line prompt">user@darknet:~$ <span class="command">welcome</span></div>
-                    <div class="terminal-line output">Initializing DarkNet Terminal v3.14...</div>
-                    <div class="terminal-line output">Establishing encrypted connection...</div>
-                    <div class="terminal-line output">Connection secured. Welcome, USER.</div>
-                    <div class="terminal-line output">Type 'help' for available commands.</div>
-                    <div class="terminal-line prompt">user@darknet:~$ <span class="command" id="currentCommand"></span></div>
+                <!-- Основной терминал -->
+                <div id="main-tab" class="tab-content active">
+                    <div class="terminal" id="terminal">
+                        <div class="terminal-line prompt">user@darknet:~$ <span class="command">welcome</span></div>
+                        <div class="terminal-line output">Initializing DarkNet Terminal v3.14...</div>
+                        <div class="terminal-line output">Establishing encrypted connection...</div>
+                        <div class="terminal-line output">Connection secured. Welcome, USER.</div>
+                        <div class="terminal-line output">Type 'help' for available commands.</div>
+                        <div class="terminal-line prompt">user@darknet:~$ <span class="command" id="currentCommand"></span></div>
+                    </div>
+                    
+                    <div class="input-area">
+                        <div class="input-prompt">user@darknet:~$</div>
+                        <input type="text" id="commandInput" class="command-input" autocomplete="off">
+                    </div>
                 </div>
                 
-                <div class="input-area">
-                    <div class="input-prompt">user@darknet:~$</div>
-                    <input type="text" id="commandInput" class="command-input" autocomplete="off">
+                <!-- Сканирование сети -->
+                <div id="network-tab" class="tab-content">
+                    <div class="terminal">
+                        <div class="terminal-line output">=== NETWORK SCANNING TOOL ===</div>
+                        <div class="terminal-line output">Target Range: 192.168.1.0/24</div>
+                        <div class="terminal-line output">Scan Type: Stealth SYN Scan</div>
+                        <div class="terminal-line output">Status: <span id="scanStatus">READY</span></div>
+                        <div id="scanResults"></div>
+                    </div>
+                    <div class="tools">
+                        <button class="tool-btn" id="startScanBtn">START SCAN</button>
+                        <button class="tool-btn" id="deepScanBtn">DEEP SCAN</button>
+                        <button class="tool-btn" id="clearScanBtn">CLEAR RESULTS</button>
+                    </div>
+                </div>
+                
+                <!-- Эксплойты -->
+                <div id="exploits-tab" class="tab-content">
+                    <div class="terminal">
+                        <div class="terminal-line output">=== EXPLOIT DATABASE ===</div>
+                        <div class="terminal-line output">Available Exploits:</div>
+                        <div class="terminal-line output">1. CVE-2021-34527 - PrintNightmare (Windows)</div>
+                        <div class="terminal-line output">2. CVE-2021-44228 - Log4Shell (Java)</div>
+                        <div class="terminal-line output">3. CVE-2019-0708 - BlueKeep (RDP)</div>
+                        <div class="terminal-line output">4. CVE-2017-0144 - EternalBlue (SMB)</div>
+                        <div class="terminal-line output">5. CVE-2014-0160 - Heartbleed (OpenSSL)</div>
+                        <div id="exploitResults"></div>
+                    </div>
+                    <div class="input-area">
+                        <div class="input-prompt">exploit@darknet:~$</div>
+                        <input type="text" id="exploitInput" class="command-input" placeholder="use [exploit_number] [target]" autocomplete="off">
+                    </div>
+                </div>
+                
+                <!-- Крипто инструменты -->
+                <div id="crypto-tab" class="tab-content">
+                    <div class="terminal">
+                        <div class="terminal-line output">=== CRYPTOGRAPHIC TOOLS ===</div>
+                        <div class="terminal-line output">Available Tools:</div>
+                        <div class="terminal-line output">- AES-256 Encryption/Decryption</div>
+                        <div class="terminal-line output">- RSA Key Generation</div>
+                        <div class="terminal-line output">- SHA-256 Hashing</div>
+                        <div class="terminal-line output">- Bitcoin Wallet Tools</div>
+                        <div id="cryptoResults"></div>
+                    </div>
+                    <div class="tools">
+                        <button class="tool-btn" id="encryptFileBtn">ENCRYPT FILE</button>
+                        <button class="tool-btn" id="decryptFileBtn">DECRYPT FILE</button>
+                        <button class="tool-btn" id="generateKeyBtn">GENERATE RSA KEY</button>
+                    </div>
+                </div>
+                
+                <!-- Режим скрытности -->
+                <div id="stealth-tab" class="tab-content">
+                    <div class="terminal">
+                        <div class="terminal-line output">=== STEALTH MODE CONFIGURATION ===</div>
+                        <div class="terminal-line output">Current Anonymity Level: <span id="currentAnonymity">HIGH</span></div>
+                        <div class="terminal-line output">TOR Routing: <span id="torStatus">ACTIVE</span></div>
+                        <div class="terminal-line output">Proxy Chain: <span id="proxyStatus">ENABLED (3 nodes)</span></div>
+                        <div class="terminal-line output">MAC Address: <span id="macStatus">SPOOFED</span></div>
+                        <div id="stealthResults"></div>
+                    </div>
+                    <div class="tools">
+                        <button class="tool-btn" id="enableStealthBtn">ENABLE MAX STEALTH</button>
+                        <button class="tool-btn" id="clearLogsBtn">WIPE LOGS</button>
+                        <button class="tool-btn" id="spoofMacBtn">SPOOF MAC</button>
+                    </div>
+                </div>
+                
+                <!-- Системные логи -->
+                <div id="logs-tab" class="tab-content">
+                    <div class="terminal">
+                        <div class="terminal-line output">=== SYSTEM SECURITY LOGS ===</div>
+                        <div class="terminal-line output">[2024-01-15 14:23:11] SSH connection established</div>
+                        <div class="terminal-line output">[2024-01-15 14:25:43] Firewall rule updated</div>
+                        <div class="terminal-line output">[2024-01-15 14:30:02] Intrusion detection: Port scan detected</div>
+                        <div class="terminal-line output">[2024-01-15 14:35:17] VPN tunnel activated</div>
+                        <div class="terminal-line output">[2024-01-15 14:40:55] Encryption keys rotated</div>
+                        <div id="liveLogs"></div>
+                    </div>
+                    <div class="tools">
+                        <button class="tool-btn" id="refreshLogsBtn">REFRESH LOGS</button>
+                        <button class="tool-btn" id="exportLogsBtn">EXPORT LOGS</button>
+                        <button class="tool-btn" id="clearAllLogsBtn">CLEAR ALL LOGS</button>
+                    </div>
                 </div>
                 
                 <div class="tools">
@@ -384,12 +510,40 @@
         const loginStatus = document.getElementById('loginStatus');
         const terminal = document.getElementById('terminal');
         const commandInput = document.getElementById('commandInput');
-        const currentCommand = document.getElementById('currentCommand');
+        let currentCommand = document.getElementById('currentCommand');
         const clearBtn = document.getElementById('clearBtn');
         const encryptBtn = document.getElementById('encryptBtn');
         const scanBtn = document.getElementById('scanBtn');
         const logoutBtn = document.getElementById('logoutBtn');
         const anonymityLevel = document.getElementById('anonymityLevel');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // Элементы вкладок
+        const startScanBtn = document.getElementById('startScanBtn');
+        const deepScanBtn = document.getElementById('deepScanBtn');
+        const clearScanBtn = document.getElementById('clearScanBtn');
+        const scanResults = document.getElementById('scanResults');
+        const scanStatus = document.getElementById('scanStatus');
+        
+        const exploitInput = document.getElementById('exploitInput');
+        const exploitResults = document.getElementById('exploitResults');
+        
+        const encryptFileBtn = document.getElementById('encryptFileBtn');
+        const decryptFileBtn = document.getElementById('decryptFileBtn');
+        const generateKeyBtn = document.getElementById('generateKeyBtn');
+        const cryptoResults = document.getElementById('cryptoResults');
+        
+        const enableStealthBtn = document.getElementById('enableStealthBtn');
+        const clearLogsBtn = document.getElementById('clearLogsBtn');
+        const spoofMacBtn = document.getElementById('spoofMacBtn');
+        const stealthResults = document.getElementById('stealthResults');
+        const currentAnonymity = document.getElementById('currentAnonymity');
+        
+        const refreshLogsBtn = document.getElementById('refreshLogsBtn');
+        const exportLogsBtn = document.getElementById('exportLogsBtn');
+        const clearAllLogsBtn = document.getElementById('clearAllLogsBtn');
+        const liveLogs = document.getElementById('liveLogs');
         
         // Переменные состояния
         let isLoggedIn = false;
@@ -537,6 +691,7 @@
                         addOutput("Режим невидимости активирован.");
                         addOutput("Все следы удалены. Отслеживание невозможно.");
                         anonymityLevel.textContent = "MAXIMUM";
+                        currentAnonymity.textContent = "MAXIMUM";
                     });
                 }
             },
@@ -670,6 +825,112 @@
             terminal.scrollTop = terminal.scrollHeight;
         }
         
+        function switchTab(tabName) {
+            // Скрываем все вкладки
+            tabContents.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Показываем выбранную вкладку
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Обновляем активный пункт меню
+            menuItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-tab') === tabName) {
+                    item.classList.add('active');
+                }
+            });
+            
+            currentTab = tabName;
+        }
+        
+        function startNetworkScan(deep = false) {
+            scanStatus.textContent = "SCANNING...";
+            scanStatus.className = "blink";
+            
+            let scanTime = deep ? 5000 : 3000;
+            
+            // Очищаем предыдущие результаты
+            scanResults.innerHTML = '';
+            
+            // Симуляция сканирования
+            setTimeout(() => {
+                scanStatus.textContent = "COMPLETED";
+                scanStatus.className = "";
+                
+                const results = [
+                    "192.168.1.1 - ROUTER (Open ports: 22, 80, 443)",
+                    "192.168.1.15 - PC-WIN10 (Open ports: 135, 139, 445, 3389)",
+                    "192.168.1.23 - SERVER-LINUX (Open ports: 22, 80, 443, 3306)",
+                    "192.168.1.42 - IOT-CAMERA (Open ports: 554, 8000)",
+                    "192.168.1.99 - UNKNOWN (Open ports: 8080)"
+                ];
+                
+                if (deep) {
+                    results.push("192.168.1.105 - PRINTER (Open ports: 515, 9100)");
+                    results.push("192.168.1.120 - NAS-STORAGE (Open ports: 21, 139, 445, 548)");
+                }
+                
+                results.forEach(result => {
+                    const line = document.createElement('div');
+                    line.className = 'terminal-line output';
+                    line.textContent = result;
+                    scanResults.appendChild(line);
+                });
+                
+                if (deep) {
+                    const vulnLine = document.createElement('div');
+                    vulnLine.className = 'terminal-line warning';
+                    vulnLine.textContent = "VULNERABILITY: CVE-2021-44228 detected on 192.168.1.23";
+                    scanResults.appendChild(vulnLine);
+                }
+            }, scanTime);
+        }
+        
+        function executeExploit(command) {
+            const parts = command.split(' ');
+            if (parts[0] !== 'use') {
+                exploitResults.innerHTML += `<div class="terminal-line error">Unknown command: ${command}</div>`;
+                return;
+            }
+            
+            const exploitId = parts[1];
+            const target = parts[2];
+            
+            if (!exploitId || !target) {
+                exploitResults.innerHTML += `<div class="terminal-line error">Usage: use [exploit_number] [target]</div>`;
+                return;
+            }
+            
+            const exploits = {
+                '1': 'CVE-2021-34527',
+                '2': 'CVE-2021-44228', 
+                '3': 'CVE-2019-0708',
+                '4': 'CVE-2017-0144',
+                '5': 'CVE-2014-0160'
+            };
+            
+            const exploitName = exploits[exploitId];
+            if (!exploitName) {
+                exploitResults.innerHTML += `<div class="terminal-line error">Unknown exploit ID: ${exploitId}</div>`;
+                return;
+            }
+            
+            exploitResults.innerHTML += `<div class="terminal-line output">Launching ${exploitName} against ${target}...</div>`;
+            
+            setTimeout(() => {
+                if (Math.random() > 0.4) {
+                    exploitResults.innerHTML += `<div class="terminal-line output">Exploit successful! Gaining access...</div>`;
+                    setTimeout(() => {
+                        exploitResults.innerHTML += `<div class="terminal-line output">Access to ${target} established. Shell available.</div>`;
+                    }, 1500);
+                } else {
+                    exploitResults.innerHTML += `<div class="terminal-line error">Exploit failed. Target may be patched.</div>`;
+                }
+            }, 3000);
+        }
+        
         // Обработчики событий
         
         loginBtn.addEventListener('click', login);
@@ -693,6 +954,112 @@
                     executeCommand(command);
                 }
             }
+        });
+        
+        // Обработчики для бокового меню
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const tabName = item.getAttribute('data-tab');
+                switchTab(tabName);
+            });
+        });
+        
+        // Обработчики для кнопок сканирования сети
+        startScanBtn.addEventListener('click', () => {
+            startNetworkScan(false);
+        });
+        
+        deepScanBtn.addEventListener('click', () => {
+            startNetworkScan(true);
+        });
+        
+        clearScanBtn.addEventListener('click', () => {
+            scanResults.innerHTML = '';
+            scanStatus.textContent = "READY";
+        });
+        
+        // Обработчики для эксплойтов
+        exploitInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const command = exploitInput.value.trim();
+                if (command) {
+                    executeExploit(command);
+                    exploitInput.value = '';
+                }
+            }
+        });
+        
+        // Обработчики для крипто инструментов
+        encryptFileBtn.addEventListener('click', () => {
+            cryptoResults.innerHTML += `<div class="terminal-line output">Encrypting file with AES-256...</div>`;
+            setTimeout(() => {
+                cryptoResults.innerHTML += `<div class="terminal-line output">File encrypted successfully. Key: 7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069</div>`;
+            }, 2000);
+        });
+        
+        decryptFileBtn.addEventListener('click', () => {
+            cryptoResults.innerHTML += `<div class="terminal-line output">Decrypting file with AES-256...</div>`;
+            setTimeout(() => {
+                cryptoResults.innerHTML += `<div class="terminal-line output">File decrypted successfully.</div>`;
+            }, 2000);
+        });
+        
+        generateKeyBtn.addEventListener('click', () => {
+            cryptoResults.innerHTML += `<div class="terminal-line output">Generating RSA-4096 key pair...</div>`;
+            setTimeout(() => {
+                cryptoResults.innerHTML += `<div class="terminal-line output">Key pair generated successfully.</div>`;
+                cryptoResults.innerHTML += `<div class="terminal-line output">Public key: 30820122300d06092a864886f70d01010105000382010f003082010a0282010100c1a...</div>`;
+            }, 3000);
+        });
+        
+        // Обработчики для режима скрытности
+        enableStealthBtn.addEventListener('click', () => {
+            stealthResults.innerHTML += `<div class="terminal-line output">Enabling maximum stealth mode...</div>`;
+            setTimeout(() => {
+                stealthResults.innerHTML += `<div class="terminal-line output">All traces erased. Tracking impossible.</div>`;
+                currentAnonymity.textContent = "MAXIMUM";
+                anonymityLevel.textContent = "MAXIMUM";
+            }, 2000);
+        });
+        
+        clearLogsBtn.addEventListener('click', () => {
+            stealthResults.innerHTML += `<div class="terminal-line output">Wiping all system logs...</div>`;
+            setTimeout(() => {
+                stealthResults.innerHTML += `<div class="terminal-line output">All logs successfully wiped.</div>`;
+            }, 1500);
+        });
+        
+        spoofMacBtn.addEventListener('click', () => {
+            stealthResults.innerHTML += `<div class="terminal-line output">Spoofing MAC address...</div>`;
+            setTimeout(() => {
+                const newMac = "02:" + Math.random().toString(16).substr(2, 2) + ":" + 
+                              Math.random().toString(16).substr(2, 2) + ":" + 
+                              Math.random().toString(16).substr(2, 2) + ":" + 
+                              Math.random().toString(16).substr(2, 2) + ":" + 
+                              Math.random().toString(16).substr(2, 2);
+                stealthResults.innerHTML += `<div class="terminal-line output">MAC address changed to: ${newMac}</div>`;
+            }, 1500);
+        });
+        
+        // Обработчики для логов
+        refreshLogsBtn.addEventListener('click', () => {
+            const newLog = document.createElement('div');
+            newLog.className = 'terminal-line output';
+            const time = new Date().toISOString().replace('T', ' ').substr(0, 19);
+            newLog.textContent = `[${time}] Security audit completed`;
+            liveLogs.appendChild(newLog);
+        });
+        
+        exportLogsBtn.addEventListener('click', () => {
+            liveLogs.innerHTML += `<div class="terminal-line output">Exporting logs to encrypted archive...</div>`;
+            setTimeout(() => {
+                liveLogs.innerHTML += `<div class="terminal-line output">Logs exported to: /secure/logs_${Date.now()}.enc</div>`;
+            }, 1500);
+        });
+        
+        clearAllLogsBtn.addEventListener('click', () => {
+            liveLogs.innerHTML = '';
+            liveLogs.innerHTML += `<div class="terminal-line output">All logs cleared.</div>`;
         });
         
         clearBtn.addEventListener('click', () => {
